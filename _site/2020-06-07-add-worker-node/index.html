@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+  <!-- Beautiful Jekyll | MIT license | Copyright Dean Attali 2020 -->
+  <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <title>Add worker node to Kubernetes Cluster</title>
+  
+  
+  <meta name="author" content="Sandeep Kulkarni">
+  
+  
+  
+
+  <link rel="alternate" type="application/rss+xml" title="Kubernetes Tutorials - Kubernetes Tutorials to get you started!" href="http://localhost:4000/feed.xml">
+
+  
+
+  
+
+  
+
+
+  
+    
+      
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+
+    
+      
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css">
+
+
+    
+      
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic">
+
+
+    
+      
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800">
+
+
+    
+  
+
+  
+    
+      <link rel="stylesheet" href="/assets/css/bootstrap-social.css">
+    
+      <link rel="stylesheet" href="/assets/css/main.css">
+    
+  
+
+  
+
+  
+
+  <!-- Facebook OpenGraph tags -->
+  
+
+  
+  <meta property="og:title" content="Add worker node to Kubernetes Cluster">
+  
+
+   
+  <meta property="og:description" content="In this tutorial, we will learn about how to add worker node to Kubernetes Cluster. To learn more about how to create a Kubernetes cluster, please refer Create single node Kubernetes cluster on Ubuntu using kubeadm on Google Cloud Platform (GCP) In case you want to add worker node to...">
+  
+
+
+  <meta property="og:type" content="website">
+
+  
+  <meta property="og:url" content="http://localhost:4000/2020-06-07-add-worker-node/">
+  <link rel="canonical" href="http://localhost:4000/2020-06-07-add-worker-node/">
+  
+
+  
+  <meta property="og:image" content="http://localhost:4000/assets/img/sk_logo_medium.png">
+  
+
+
+  <!-- Twitter summary cards -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="@">
+  <meta name="twitter:creator" content="@">
+
+  
+  <meta name="twitter:title" content="Add worker node to Kubernetes Cluster">
+  
+
+  
+  <meta name="twitter:description" content="In this tutorial, we will learn about how to add worker node to Kubernetes Cluster. To learn more about how to create a Kubernetes cluster, please refer Create single node Kubernetes cluster on Ubuntu using kubeadm on Google Cloud Platform (GCP) In case you want to add worker node to...">
+  
+
+  
+  <meta name="twitter:image" content="http://localhost:4000/assets/img/sk_logo_medium.png">
+  
+
+  
+
+  
+
+</head>
+
+
+  <body>
+
+    
+
+  
+    <nav class="navbar navbar-expand-md navbar-light fixed-top navbar-custom "><a class="navbar-brand" href="http://localhost:4000/">Kubernetes Tutorials</a><button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="main-navbar">
+    <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="https://sandeepnkulkarni.github.io">About me</a>
+          </li></ul>
+  </div>
+
+  
+    <div class="avatar-container">
+      <div class="avatar-img-border">
+        <a href="http://localhost:4000/">
+          <img alt="Navbar avatar" class="avatar-img" src="/assets/img/sk_logo_medium.png" />
+        </a>
+      </div>
+    </div>
+  
+
+</nav>
+
+
+    <!-- TODO this file has become a mess, refactor it -->
+
+
+
+
+
+
+
+<header class="header-section ">
+
+<div class="intro-header no-img">
+  <div class="container-md">
+    <div class="row">
+      <div class="col-xl-8 offset-xl-2 col-lg-10 offset-lg-1">
+        <div class="post-heading">
+          <h1>Add worker node to Kubernetes Cluster</h1>
+      
+      
+      
+          <span class="post-meta">Posted on June 7, 2020</span>
+          
+            <!--- "ReadTime on GitHub Jekyll" (c) 2020 Ruby Griffith Ramirez, MIT License -->
+
+
+
+
+
+
+  
+  <span class="reader-time post-meta"><span class="d-none d-md-inline middot">&middot;</span> 1 minute read</span>
+
+
+          
+      
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</header>
+
+
+
+
+
+<div class="container-md">
+  <div class="row">
+    <div class="col-xl-8 offset-xl-2 col-lg-10 offset-lg-1">
+
+      
+
+      <article role="main" class="blog-post">
+        <p>In this tutorial, we will learn about how to add worker node to Kubernetes Cluster. To learn more about how to create a Kubernetes cluster, please refer <a href="2020-06-17-single-node-k8s-ubuntu-gcp-kubeadm.md">Create single node Kubernetes cluster on Ubuntu using kubeadm on Google Cloud Platform (GCP)</a></p>
+
+<p>In case you want to add worker node to an existing Kubernetes cluster, you can use <code class="language-plaintext highlighter-rouge">kubeadm join</code> command like below:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubeadm join 10.240.0.10:6443 --token qime8q.8mpf97fdxxxxxxxx \
+    --discovery-token-ca-cert-hash sha256:8f61ee1955f194f6cc7a6888baf37447b29a86a93b214205154a8abdxxxxxxxx
+</code></pre></div></div>
+
+<p>When you configure a fresh Kubernetes cluster using <code class="language-plaintext highlighter-rouge">kubeadm init</code>, you will get the token information as part of the output itself.</p>
+
+<p>However, tokens have a default expiry period of 24 hrs, so in case you need to generate new token to join worker node, use below command:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubeadm token create --print-join-command
+</code></pre></div></div>
+
+<p>Once you have a valid token, you can run the <code class="language-plaintext highlighter-rouge">kubeadm join</code> command.</p>
+
+<p>Sample output:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo kubeadm join 10.240.0.10:6443 --token qime8q.8mpf97fdxxxxxxxx \
+    --discovery-token-ca-cert-hash sha256:8f61ee1955f194f6cc7a6888baf37447b29a86a93b214205154a8abdxxxxxxxx
+W0529 07:12:00.016796    4465 join.go:346] [preflight] WARNING: JoinControlPane.controlPlane settings will be ignored when control-plane flag is not set.
+[preflight] Running pre-flight checks
+[preflight] Reading configuration from the cluster...
+[preflight] FYI: You can look at this config file with 'kubectl -n kube-system get cm kubeadm-config -oyaml'
+[kubelet-start] Downloading configuration for the kubelet from the "kubelet-config-1.18" ConfigMap in the kube-system namespace
+[kubelet-start] Writing kubelet configuration to file "/var/lib/kubelet/config.yaml"
+[kubelet-start] Writing kubelet environment file with flags to file "/var/lib/kubelet/kubeadm-flags.env"
+[kubelet-start] Starting the kubelet
+[kubelet-start] Waiting for the kubelet to perform the TLS Bootstrap...
+
+This node has joined the cluster:
+* Certificate signing request was sent to apiserver and a response was received.
+* The Kubelet was informed of the new secure connection details.
+
+Run 'kubectl get nodes' on the control-plane to see this node join the cluster.
+</code></pre></div></div>
+
+      </article>
+
+      
+        <div class="blog-tags">
+          Tags:
+          
+          
+            <a href="/tags#kubernetes">kubernetes</a>
+          
+            <a href="/tags#worker-node">worker-node</a>
+          
+          
+        </div>
+      
+
+      
+        <!-- Check if any share-links are active -->
+
+
+
+
+
+      
+
+      <ul class="pagination blog-pager">
+        
+        <li class="page-item previous">
+          <a class="page-link" href="/2020-06-07-single-node-k8s-ubuntu-gcp-kubeadm/" data-toggle="tooltip" data-placement="top" title="Create single node Kubernetes cluster on Ubuntu using kubeadm on Google Cloud Platform (GCP)">&larr; Previous Post</a>
+        </li>
+        
+        
+        <li class="page-item next">
+          <a class="page-link" href="/2020-06-07-reset-kubernetes-cluster/" data-toggle="tooltip" data-placement="top" title="Reset Kubernetes Cluster using kubeadm">Next Post &rarr;</a>
+        </li>
+        
+      </ul>
+              
+  
+  
+  
+
+  
+
+
+
+    </div>
+  </div>
+</div>
+
+
+    <footer>
+  <div class="container-md beautiful-jekyll-footer">
+    <div class="row">
+      <div class="col-xl-8 offset-xl-2 col-lg-10 offset-lg-1">
+      <ul class="list-inline text-center footer-links"><li class="list-inline-item">
+    <a href="/feed.xml" title="RSS">
+      <span class="fa-stack fa-lg" aria-hidden="true">
+        <i class="fas fa-circle fa-stack-2x"></i>
+        <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+      </span>
+      <span class="sr-only">RSS</span>
+    </a>
+  </li><li class="list-inline-item">
+    <a href="https://github.com/sandeepnkulkarni" title="GitHub">
+      <span class="fa-stack fa-lg" aria-hidden="true">
+        <i class="fas fa-circle fa-stack-2x"></i>
+        <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+      </span>
+      <span class="sr-only">GitHub</span>
+   </a>
+  </li></ul>
+
+      
+      <p class="copyright text-muted">
+      
+        Sandeep Kulkarni
+        &nbsp;&bull;&nbsp;
+      
+      2020
+
+      
+        &nbsp;&bull;&nbsp;
+        <a href="http://localhost:4000/">https://sandeepnkulkarni.github.io</a>
+      
+
+      
+      </p>
+      <!-- Please don't remove this, keep my open source work credited :) -->
+      <p class="theme-by text-muted">
+        Theme by
+        <a href="https://beautifuljekyll.com">beautiful-jekyll</a>
+      </p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+  
+    
+  
+    
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+
+
+  
+    
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+
+
+  
+    
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
+
+  
+
+
+
+  
+    <!-- doing something a bit funky here because I want to be careful not to include JQuery twice! -->
+    
+      <script src="/assets/js/main.js"></script>
+    
+  
+
+
+
+
+
+
+  
+  </body>
+</html>
